@@ -38,7 +38,6 @@ int main() {
   while (1) {
     CANMessage msg;
     if (can.read(msg) && msg.format == CANFormat::CANStandard && msg.id == can_id && msg.len == pwms.size()) {
-      printf("yay message\n");
       for (size_t i = 0; i < pwms.size(); i++) {
         int pulse_width_us = byte_to_pulse_width(msg.data[i]).count();
         pwms[i].pulsewidth_us(pulse_width_us);
