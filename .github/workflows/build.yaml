@@ -1,0 +1,52 @@
+name: PlatformIO CI
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Bump Version  # バージョンをあげる
+        id: bump-version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+          dry_run: true  # tagはRelease作成時つける
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+            .cache
+          key: ${{ runner.os }}-pio
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Install Build Dependency
+        run: pip install intelhex==2.3.0 jinja2==3.1.2 pyelftools==0.25 beautifulsoup4==4.11.1 future==0.18.1 prettytable==3.3.0 jsonschema==4.14.0 six==1.16.0
+
+      - name: Build PlatformIO Project
+        run: scripts/build.bash
+
+      - name: Create Release  # Releaseを作成
+        if: ${{ steps.bump-version.outputs.release_type != false }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.bump-version.outputs.new_tag }}
+          body: ${{ steps.bump-version.outputs.changelog }}
+          artifacts: build/*

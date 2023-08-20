@@ -10,7 +10,7 @@ using namespace std::chrono;
 namespace {
 
 constexpr int frequency = 60;
-constexpr int can_id = 144;
+constexpr int can_id = 149;
 
 constexpr microseconds min_pulse_width = 500us;
 constexpr microseconds max_pulse_width = 2500us;
